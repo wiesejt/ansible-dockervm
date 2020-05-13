@@ -1,0 +1,45 @@
+---
+  - name: Set up container
+    hosts: localhost
+    become: yes
+    roles:
+      - geerlingguy.docker
+      - geerlingguy.pip
+      - geerlingguy.git
+
+    vars:
+      pip_package: python3-pip
+      pip_install_packages:
+        - name: docker_compose
+        - name: docker
+
+      tasks:
+      - name: Create network
+        docker_network:
+          name: media_net
+
+      - name: Create traefik
+        docker_network:
+          name: traefik_net
+
+      - name: Create container directories
+        file:
+          path: "{{item.path}}"
+          state: directory
+        with_items:
+          - {path: "/docker/radarr/"}
+          - {path: "/docker/sonarr/"}
+          - {path: "/docker/ombi/"}
+          - {path: "/docker/jackett/"}
+          - {path: "/docker/vpn/"}
+          - {path: "/docker/docker-compose-files/media"}
+
+      - name: Pull compose file
+        git:
+          repo: 'https://github.com/wiesejt/docker-compose-plex.git'
+          dest: /docker/docker-compose-files/media/
+
+      - name: Start compose file
+        docker_compose:
+          project_src: /docker/docker-compose-files/media
+        register: output

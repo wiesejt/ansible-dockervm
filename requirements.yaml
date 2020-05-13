@@ -1,0 +1,6 @@
+# Install git
+- src: geerlingguy.git
+# Install pip
+- src: geerlingguy.pip
+# Install docker
+- src: geerlingguy.docker
